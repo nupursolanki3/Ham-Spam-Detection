@@ -1,0 +1,49 @@
+grunt> clean_data = FOREACH spamham GENERATE REPLACE(Subject,',|\n',' ') AS  Subject, Sender AS Sender,Recipient AS Recipient;
+grunt> clean_data = FOREACH clean_data GENERATE FLATTEN(Subject) as Subject, FLATTEN(Sender) as Sender, FLATTEN(Recipient) as Recipient;
+grunt> clean_data = FOREACH clean_data GENERATE TRIM(Subject) as Subject, TRIM(Sender) as Sender, TRIM(Recipient) as Recipient;
+grunt> spamham_data = FOREACH clean_data GENERATE Subject, Sender, Recipient,( CASE WHEN Subject MATCHES '.*(off|looking|registration|confirmation|sale|free|viagra|oppurtunities|prices|weightloss|young|super|out).*' THEN 'spam' ELSE 'ham' END ) AS predicted_label;
+
+grunt> spam_data = FILTER spamham_data BY predicted_label == 'spam';
+grunt> ham_data = FILTER spamham_data BY predicted_label == 'ham';
+
+grunt>clubbedspam_data = GROUP spam_data BY Sender;
+grunt>spamdata_club = FOREACH clubbedspam_data GENERATE group AS Sender, COUNT(spam_data) AS spam_count;
+
+grunt>spammer_data = ORDER spamdata_club BY spam_count DESC;
+
+grunt>topspam_accounts = LIMIT spammer_data 10;
+
+grunt>dump topspam_accounts
+
+(qsmith@example.net,3)
+(ajohnson@example.com,3)
+(fosterdana@example.net,2)
+(michaelharris@example.net,2)
+(handerson@example.org,2)
+(john58@example.org,2)
+(michaeljackson@example.com,2)
+(stephanie33@example.net,2)
+(jacksonkaren@example.org,2)
+(ijohnson@example.net,2)
+ 
+
+grunt>clubbedham_data = GROUP ham_data BY Sender;
+grunt>hamdata_club = FOREACH clubbedham_data GENERATE group AS Sender, COUNT(ham_data) AS ham_count;
+grunt>hammer_data = ORDER hamdata_club BY ham_count DESC;
+grunt>topham_accounts = LIMIT hammer_data 10;
+
+
+grunt>dump topham_accounts;
+
+(michaelbrown@example.org,2)
+(ericjohnson@example.net,2)
+(jeffreyrussell@example.com,2)
+(kwilliams@example.org,2)
+(alexander90@example.net,2)
+(ajohnson@example.com,2)
+(robert62@example.net,2)
+(tmiller@example.net,2)
+(joel86@example.org,2)
+(fmills@example.org,2)
+
+
