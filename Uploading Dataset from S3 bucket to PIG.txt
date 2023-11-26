@@ -1,0 +1,22 @@
+[hadoop@ip-172-31-32-38 ~]$ mkdir csv
+[hadoop@ip-172-31-32-38 ~]$ cd csv
+[hadoop@ip-172-31-32-38 csv]$ aws s3 cp "s3://bucketawsbuck/Dataset.csv" data.csv                                                                                    
+download: s3://spamdataset12/Dataset.csv to ./data.csv          
+[hadoop@ip-172-31-32-38 csv]$ ls
+data.csv
+[hadoop@ip-172-31-32-38 csv]$ hdfs dfs -mkdir /hamspam
+[hadoop@ip-172-31-32-38 csv]$ hdfs dfs -ls /
+Found 5 items
+drwxr-xr-x   - hdfs   hdfsadmingroup          0 2023-11-14 16:35 /apps
+drwxr-xr-x   - hadoop hdfsadmingroup          0 2023-11-14 16:34 /hamspam
+drwxrwxrwt   - hdfs   hdfsadmingroup          0 2023-11-14 16:35 /tmp
+drwxr-xr-x   - hdfs   hdfsadmingroup          0 2023-11-14 16:35 /user
+drwxr-xr-x   - hdfs   hdfsadmingroup          0 2023-11-14 16:35 /var
+[hadoop@ip-172-31-32-38 csv]$ hdfs dfs -copyFromLocal './data.csv' /hamspam
+[hadoop@ip-172-31-32-38 csv]$ hdfs dfs -ls /hamspam
+Found 1 items
+-rw-r--r--   1 hadoop hdfsadmingroup    5680135 2023-11-14 16:35 /hamspam/data.csv
+[hadoop@ip-172-31-32-38 csv]$ pig -x MapReduce
+grunt> spamham = LOAD '/hamspam/data.csv' USING org.apache.pig.piggybank.storage.CSVExcelStorage(',', 'YES_MULTILINE', 'UNIX', 'SKIP_INPUT_HEADER') AS ( Subject:chararray, Sender:chararray, Recipient:chararray);
+
+dump spamham;
